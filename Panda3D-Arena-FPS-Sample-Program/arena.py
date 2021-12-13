@@ -170,7 +170,7 @@ class app(ShowBase):
         self.world.set_gravity(Vec3(0, 0, -9.81))
         
         #floor
-        arena_1 = self.loader.load_model('models/New_Test.glb')
+        arena_1 = self.loader.load_model('models/Arena_Test.glb')
         arena_1.reparent_to(self.render)
         arena_1.set_pos(0, 0, 0)
         #arena_1.set_scale(100)
@@ -219,8 +219,8 @@ class app(ShowBase):
         shape_1 = BulletCapsuleShape(0.75, 0.5, ZUp)
         player_node = BulletCharacterControllerNode(shape_1, 0.1, 'Player')  # (shape, mass, player name)
         player_np = self.render.attach_new_node(player_node)
-        #player pos
-        player_np.set_pos(-20, -10, 30)
+        #player po        x    z    y
+        player_np.set_pos(91, -95, 10)
         
         player_np.set_collide_mask(BitMask32.allOn())
         self.world.attach_character(player_np.node())
