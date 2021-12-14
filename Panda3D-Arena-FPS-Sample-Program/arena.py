@@ -1,5 +1,7 @@
 from direct.gui.DirectGui import *
 
+import pygame
+
 from direct.showbase.ShowBase import ShowBase
 from direct.stdpy import threading2
 from direct.filter.CommonFilters import CommonFilters
@@ -221,7 +223,7 @@ class app(ShowBase):
         player_np = self.render.attach_new_node(player_node)
         #player po        x    z    y
         #player_np.set_pos(91, -95, 10)
-        player_np.set_pos(0, 0, 15)
+        player_np.set_pos(0, 0, 20)
         
         player_np.set_collide_mask(BitMask32.allOn())
         self.world.attach_character(player_np.node())
@@ -341,7 +343,7 @@ class app(ShowBase):
         self.accept("shift-up", setKey, ["run", 0])
         self.accept("space", setKey, ["jump", 1])
         self.accept("space-up", setKey, ["jump", 0])
-        # disable mouse
+        #disable mouse
         if screen == False:
             self.disable_mouse()
 
@@ -529,7 +531,7 @@ class app(ShowBase):
             self.left_trigger_val = left_trigger.value
             
             
-            xy_speed = 12
+            xy_speed = 15
             p_speed = 30
             rotate_speed = 100
                 
@@ -649,4 +651,48 @@ class app(ShowBase):
         
 
 
-app().run()
+#app().run()
+        
+def main():
+    #-----------------------------Setup------------------------------------------------------#
+    """ Set up the game and run the main game loop """
+    pygame.init()      # Prepare the pygame module for use
+    screen = pygame.display.set_mode((0, 0), pygame.FULLSCREEN)
+    
+    clock = pygame.time.Clock()  #Force frame rate to be slower
+    isBegin = True
+
+
+
+
+    #-----------------------------Main Game Loop---------------------------------------------#
+    while True:
+        
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.display.quit()
+
+        if isBegin:
+            screen.fill((0, 0, 0))
+            pressed = pygame.key.get_pressed()
+            xx,yy = pygame.mouse.get_pos()
+        
+            screen.fill((0, 0, 0))
+            
+            #Start Box
+            pygame.draw.rect(screen, (255,255,255), (340,400,250,100))
+            
+            if xx > 340 and xx < 340 + 250 and yy > 400 and yy < 400 + 100:
+                if event.type == pygame.MOUSEBUTTONDOWN:
+                    app().run()
+              
+        
+
+        pygame.display.flip()
+        
+        clock.tick(60)
+
+
+    pygame.quit()
+
+main()
