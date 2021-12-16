@@ -130,17 +130,17 @@ def main():
         for i in range(0, len(thingys)):
             pygame.draw.circle(mainSurface, (color), (progressed[i].x, progressed[i].y), size)
             # Collison detection resets ball position and reflects moveButspicycity
-            if progressed[i].y > surface_size-20:
-                progressed[i].y -= 1
+            if progressed[i].y > surface_size-size:
+                progressed[i].y -= size
                 progressed[i].moveButspicy_y = (progressed[i].moveButspicy_y*-1)
-            if progressed[i].y < 20:
-                progressed[i].y += 1
+            if progressed[i].y < size:
+                progressed[i].y += size
                 progressed[i].moveButspicy_y = (progressed[i].moveButspicy_y*-1)
-            if progressed[i].x > surface_size-20:
-                progressed[i].x -= 1
+            if progressed[i].x > surface_size-size:
+                progressed[i].x -= size
                 progressed[i].moveButspicy_x = (progressed[i].moveButspicy_x*-1)
-            if progressed[i].x < 20:
-                progressed[i].x += 1
+            if progressed[i].x < size:
+                progressed[i].x += size
                 progressed[i].moveButspicy_x = (progressed[i].moveButspicy_x*-1)
                 
             # Now the surface is ready, tell pygame to display it!
