@@ -1,0 +1,8 @@
+very clean gui with start and end
+music and sound effects - walking sound effect/ tile?
+draw maze in blender
+create 3 difrent mazes for "changing mazes"
+fix ighting and shaders
+
+To do/ tips:
+refofrmat og code 
