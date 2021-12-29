@@ -1,6 +1,35 @@
+'''
+Name:          3D Maze Game
+Author:        Sebastian Lak
+Created:       01-15-21
+Updated        29-12-21
+
+Features:
+
+Start Screen
+Settings Screen - Settings Button
+Game Screen - Start Button
+End Screen - Finished
+Keyboard Shortcuts
+FPS Counter
+
+Movment Controll:
+
+X box controller
+keyboard and mouse
+keyboard and mouse pad
+
+For the full expirence change the game screen size to you native monitor screen size ( example - 1920 by 1080)
+Change this in line 59 win-size *1920 1080* 
+
+'''
+#Global imports and variables
+
 from direct.gui.DirectGui import *
 
 import pygame
+
+end = False
 
 from direct.showbase.ShowBase import ShowBase
 from direct.stdpy import threading2
@@ -32,8 +61,10 @@ import gltf
 # local imports
 import actor_data
 
+#use for update supression
 screen = False
 
+#main 3d game
 class app(ShowBase):
     def __init__(self):
         load_prc_file_data("", """
@@ -64,32 +95,21 @@ class app(ShowBase):
         fb_props.set_rgba_bits(16, 16, 16, 16)
         fb_props.set_depth_bits(24)
         
-        def start():
-            owen = True
-    
-            if owen:
-                #screen                                         L  R   B   T
-                self.gameOverScreen = DirectDialog(frameSize = (-1, 1, -1, 1),
-                                   fadeScreen = 0.4,
-                                   relief = DGG.FLAT)
-                self.game_start = 1
-                print("ahhhh")
-                
-        #start()
-        
-        # begin gamepad initialization
+        #begin gamepad initialization
         self.gamepad = None
         devices = self.devices.get_devices(InputDevice.DeviceClass.gamepad)
 
         if int(str(devices)[0]) > 0:
             self.gamepad = devices[0]
 
+        #error checking
         def do_nothing():
             print('Something should happen?')
-            
+        
+        #exit
         def gp_exit():
             sys.exit()[0]
-
+        
         self.accept("gamepad-back", gp_exit)
         self.accept("gamepad-start", do_nothing)
         self.accept("gamepad-face_b", do_nothing)
@@ -102,7 +122,7 @@ class app(ShowBase):
             
         self.right_trigger_val = 0.0
         self.left_trigger_val = 0.0
-        # end gamepad initialization
+        #end gamepad initialization
         
         props = WindowProperties()
         props.set_mouse_mode(WindowProperties.M_relative)
@@ -114,12 +134,10 @@ class app(ShowBase):
         self.camLens.set_fov(90)
         self.camLens.set_near_far(0.01, 90000)
         self.camLens.set_focal_length(7)
-        # self.camera.set_pos(0, 0, 2)
         
         # ConfigVariableManager.getGlobalPtr().listVariables()
         
         # point light generator
-        
         for x in range(1):
             plight_1 = PointLight('plight')
             # add plight props here
@@ -139,12 +157,9 @@ class app(ShowBase):
         scene_filters = CommonFilters(base.win, base.cam)
         scene_filters.set_bloom()
         scene_filters.set_high_dynamic_range()
-        #?
         scene_filters.set_exposure_adjust(0.5)
         scene_filters.set_gamma_adjust(0.5)
-        #scene_filters.set_volumetric_lighting(plight_1_node, 64, 0.2, 0.7, 0.01)
-        #scene_filters.set_blur_sharpen(1)
-        #scene_filters.set_ambient_occlusion(32, 0.05, 2.0, 0.01, 0.000002)
+        scene_filters.set_blur_sharpen(1)
         
         self.accept("f3", self.toggle_wireframe)
         self.accept("escape", sys.exit, [0])
@@ -157,6 +172,7 @@ class app(ShowBase):
         
         self.game_start = 0
         
+        #More imports
         from panda3d.bullet import BulletWorld
         from panda3d.bullet import BulletCharacterControllerNode
         from panda3d.bullet import ZUp
@@ -172,7 +188,7 @@ class app(ShowBase):
         self.world.set_gravity(Vec3(0, 0, -9.81))
         
         #floor
-        arena_1 = self.loader.load_model('models/Arena_Test69.glb')
+        arena_1 = self.loader.load_model('models/Maze_Final_Test.glb')
         arena_1.reparent_to(self.render)
         arena_1.set_pos(0, 0, 0)
         #arena_1.set_scale(100)
@@ -202,9 +218,6 @@ class app(ShowBase):
             np.node().set_friction(0.01)
             np.set_pos(target_pos)
             np.set_scale(1)
-            # np.set_h(180)
-            # np.set_p(180)
-            # np.set_r(180)
             np.set_collide_mask(BitMask32.allOn())
             world.attach_rigid_body(np.node())
         
@@ -221,9 +234,11 @@ class app(ShowBase):
         shape_1 = BulletCapsuleShape(0.75, 0.5, ZUp)
         player_node = BulletCharacterControllerNode(shape_1, 0.1, 'Player')  # (shape, mass, player name)
         player_np = self.render.attach_new_node(player_node)
-        #player po        x    z    y
-        #player_np.set_pos(91, -95, 10)
-        player_np.set_pos(0, 0, 20)
+        #player pos       x    z    y
+        #The begining
+        player_np.set_pos(-70, 70, 5)
+        #The End
+        #player_np.set_pos(57, -66, 5)
         
         player_np.set_collide_mask(BitMask32.allOn())
         self.world.attach_character(player_np.node())
@@ -245,15 +260,15 @@ class app(ShowBase):
         self.camera.set_y(self.player, 0.03)
         self.camera.set_z(self.player, 0.5)
         
-        # player gun begins
-        self.player_gun = actor_data.arm_handgun
-        self.player_gun.reparent_to(self.render)
-        self.player_gun.reparent_to(self.camera)
-        self.player_gun.set_x(self.camera, 0.1)
-        self.player_gun.set_y(self.camera, 0.25)
-        self.player_gun.set_z(self.camera, -0.08)
-        self.player_gun.setScale(0.01)
-        self.player_gun.setH(90)
+        # player fLight begins
+        self.player_fLight = actor_data.arm_handfLight
+        self.player_fLight.reparent_to(self.render)
+        self.player_fLight.reparent_to(self.camera)
+        self.player_fLight.set_x(self.camera, 0.1)
+        self.player_fLight.set_y(self.camera, 0.25)
+        self.player_fLight.set_z(self.camera, -0.08)
+        self.player_fLight.setScale(0.01)
+        self.player_fLight.setH(90)
         
         
         # directly make a text node to display text
@@ -283,15 +298,31 @@ class app(ShowBase):
         target_dot.set_align(TextNode.ACenter)
         # see the Task section for relevant dot update logic
         
-        
         # print player position on mouse click
         def print_player_pos():
-            print(self.player.get_pos())
-            self.player.node().do_jump()
+            playerPOS = self.player.get_pos()
+            #print(playerPOS)
 
+            #Takes players X, Y
+            charX = playerPOS[0]
+            charY = playerPOS[1]
+            #print(charX)
+            #print(charY)
+    
+            #collision detection of player
+            if charX > 65.0 and charX < 75.0 and charY > -75.0 and charY < -65.0:
+                global end
+                end = True
+                #print(end)
+                #print("WORKING")
+                base.destroy()
+                main()
+        
+        #keybinds
         self.accept('mouse3', print_player_pos)
         self.accept("gamepad-face_a", print_player_pos)
 
+        #flashlight Cide
         self.flashlight_state = 0
 
         def toggle_flashlight():
@@ -325,7 +356,7 @@ class app(ShowBase):
         self.accept("gamepad-face_x", toggle_flashlight)
         
         # 3D player movement system begins
-        self.keyMap = {"left": 0, "right": 0, "forward": 0, "backward": 0, "run": 0, "jump": 0}
+        self.keyMap = {"left": 0, "right": 0, "forward": 0, "backward": 0, "run": 0}
 
         def setKey(key, value):
             self.keyMap[key] = value
@@ -341,8 +372,6 @@ class app(ShowBase):
         self.accept("s-up", setKey, ["backward", 0])
         self.accept("shift", setKey, ["run", 1])
         self.accept("shift-up", setKey, ["run", 0])
-        self.accept("space", setKey, ["jump", 1])
-        self.accept("space-up", setKey, ["jump", 0])
         #disable mouse
         if screen == False:
             self.disable_mouse()
@@ -437,12 +466,13 @@ class app(ShowBase):
                         self.player.set_h(h)
                         camViewTarget.set_x(h)
                         
-                    # hide the gun if looking straight down
+                    # hide the fLight if looking straight down
                     if p < -30:
-                        self.player_gun.hide()
+                        self.player_fLight.hide()
                     if p > -30:
-                        self.player_gun.show()
-
+                        self.player_fLight.show()
+                
+                #Movment
                 if self.keyMap["left"]:
                     if self.static_pos_bool:
                         self.static_pos_bool = False
@@ -478,6 +508,7 @@ class app(ShowBase):
                 if self.keyMap["forward"]:
                     if self.static_pos_bool:
                         self.static_pos_bool = False
+                        print_player_pos()
                         
                     self.player.set_y(self.player, self.movementSpeedForward * globalClock.get_dt())
                     
@@ -487,6 +518,7 @@ class app(ShowBase):
                     if not self.static_pos_bool:
                         self.static_pos_bool = True
                         self.static_pos = self.player.get_pos()
+                        print_player_pos()
                         
                     self.player.set_x(self.static_pos[0])
                     self.player.set_y(self.static_pos[1])
@@ -531,7 +563,7 @@ class app(ShowBase):
             self.left_trigger_val = left_trigger.value
             
             
-            xy_speed = 15
+            xy_speed = 12
             p_speed = 30
             rotate_speed = 100
                 
@@ -587,11 +619,11 @@ class app(ShowBase):
                     
                 self.player.set_x(self.static_pos[0])
                 
-            # hide the gun if looking straight down
+            # hide the fLight if looking straight down
             if self.camera.get_p() < -30:
-                self.player_gun.hide()
+                self.player_fLight.hide()
             if self.camera.get_p() > -30:
-                self.player_gun.show()
+                self.player_fLight.show()
 
             return Task.cont
 
@@ -602,7 +634,7 @@ class app(ShowBase):
         node.add_shape(ground_plane)
         node.set_friction(0.1)
         np = self.render.attach_new_node(node)
-        np.set_pos(0, 0, -1)
+        np.set_pos(0, 0, 1)
         self.world.attach_rigid_body(node)
 
         # Bullet debugger
@@ -634,7 +666,6 @@ class app(ShowBase):
             
             self.task_mgr.add(update)
         
-
         def physics_update(Task):
             dt = globalClock.get_dt()
             self.world.do_physics(dt)
@@ -649,21 +680,26 @@ class app(ShowBase):
         #self.task_mgr.add(update)
         self.task_mgr.add(physics_update)
         
-
-
-#app().run()
-        
+#2d Code
 def main():
     #-----------------------------Setup------------------------------------------------------#
     """ Set up the game and run the main game loop """
     pygame.init()      # Prepare the pygame module for use
+    
+    #Fonts
+    font1 = pygame.font.SysFont("arial", 55, True)
+    font2 = pygame.font.SysFont("arial", 150, True)
+    font3 = pygame.font.SysFont("arial", 28, True)
+    
     screen = pygame.display.set_mode((0, 0), pygame.FULLSCREEN)
     
     clock = pygame.time.Clock()  #Force frame rate to be slower
     isBegin = True
-
-
-
+    setting = False
+    global end
+    boxColor1 = (200,200,200)
+    boxColor2 = (200,200,200)
+    exitColor = (200,200,200)
 
     #-----------------------------Main Game Loop---------------------------------------------#
     while True:
@@ -671,7 +707,8 @@ def main():
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 pygame.display.quit()
-
+        
+        #Start Screen
         if isBegin:
             screen.fill((0, 0, 0))
             pressed = pygame.key.get_pressed()
@@ -679,19 +716,98 @@ def main():
         
             screen.fill((0, 0, 0))
             
-            #Start Box
-            pygame.draw.rect(screen, (255,255,255), (340,400,250,100))
+            #Title
+            title = font1.render("Maze Game",True,(255,255,255))
+            screen.blit(title, (775,290))
             
-            if xx > 340 and xx < 340 + 250 and yy > 400 and yy < 400 + 100:
+            #Start Box
+            pygame.draw.rect(screen, boxColor1, (810,540,250,100))
+            commence = font1.render("Start",True,(255,255,255))
+            screen.blit(commence, (870,560))
+            
+            if xx > 810 and xx < 810 + 250 and yy > 540 and yy < 540 + 100:
                 if event.type == pygame.MOUSEBUTTONDOWN:
                     app().run()
+                    isBegin = False
+                boxColor1 = (230,230,230)
+            else:
+                boxColor1 = (200,200,200)
               
-        
+            #Info Box
+            pygame.draw.rect(screen, boxColor2, (810,650,250,100))
+            settings = font1.render("Info",True,(255,255,255))
+            screen.blit(settings, (883,670))
+            
+            if xx > 810 and xx < 810 + 250 and yy > 650 and yy < 650 + 100:
+                if event.type == pygame.MOUSEBUTTONDOWN:
+                    setting = True
+                    isBegin = False
+                boxColor2 = (230,230,230)
+            else:
+                boxColor2 = (200,200,200)
+                
+            #Exit Box
+            pygame.draw.rect(screen, exitColor, (25,25,100,50))
+            settings = font3.render("Exit",True,(255,255,255))
+            screen.blit(settings, (47,35))
+            
+            if xx > 25 and xx < 25 + 100 and yy > 25 and yy < 25 + 50:
+                if event.type == pygame.MOUSEBUTTONDOWN:
+                    pygame.quit()
+                    quit()
+                exitColor = (230,230,230)
+            else:
+                exitColor = (200,200,200)
 
+        #info Screen
+        if setting:
+            pressed = pygame.key.get_pressed()
+            xx,yy = pygame.mouse.get_pos()
+            screen.fill((0, 0, 0))
+            
+            check = font1.render("Check Console for Info",True,(255,255,255))
+            screen.blit(check, (635,290))            
+            
+            f = open("info.txt", "r")
+            
+            print(f.read())
+            
+            #Back Box
+            pygame.draw.rect(screen, boxColor2, (25,25,100,50))
+            settings = font3.render("Back",True,(255,255,255))
+            screen.blit(settings, (40,35))
+            
+            if xx > 25 and xx < 25 + 100 and yy > 25 and yy < 25 + 50:
+                if event.type == pygame.MOUSEBUTTONDOWN:
+                    setting = False
+                    isBegin = True                    
+                boxColor2 = (230,230,230)
+            else:
+                boxColor2 = (200,200,200)
+                
+        #end screen
+        if end:
+            screen.fill((0,0,0))
+            
+            welcome = font1.render("Welcome to the Light",True,(255,255,255))
+            screen.blit(welcome, (650,350))            
+            
+            #Exit Box
+            pygame.draw.rect(screen, exitColor, (25,25,100,50))
+            settings = font3.render("Exit",True,(255,255,255))
+            screen.blit(settings, (45,35))
+            
+            if xx > 25 and xx < 25 + 100 and yy > 25 and yy < 25 + 50:
+                if event.type == pygame.MOUSEBUTTONDOWN:
+                    pygame.quit()
+                    quit()
+                exitColor = (230,230,230)
+            else:
+                exitColor = (200,200,200)
+            
         pygame.display.flip()
         
         clock.tick(60)
-
 
     pygame.quit()
 

@@ -1,0 +1,24 @@
+Name:          3D Maze Game
+Author:        Sebastian Lak
+Created:       01-15-21
+Updated        29-12-21
+
+Features:
+Start Screen
+Settings Screen - Settings Button
+Game Screen - Start Button
+End Screen - Finished
+Keyboard Shortcuts
+FPS Counter
+Movment Controll:
+X box controller
+keyboard and mouse
+keyboard and mouse pad
+
+For the full expirence change the game screen size to you native monitor screen size ( example - 1920 by 1080)
+Change this in line 59 win-size *1920 1080*
+
+Use wasd for movment
+Goal is to reach the end
+
+Have Fun!
