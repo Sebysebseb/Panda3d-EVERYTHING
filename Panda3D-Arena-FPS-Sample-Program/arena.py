@@ -124,11 +124,20 @@ class app(ShowBase):
         self.left_trigger_val = 0.0
         #end gamepad initialization
         
+        #Load music
+        backMusic = base.loader.loadSfx("Music/Background_Music.mp3")
+        
+        #Play music
+        backMusic.play()
+        
+        #Load walking spund effect
+        walkSound = base.loader.loadSfx("Music/Walking_Sound.mp3")
+        
         props = WindowProperties()
         props.set_mouse_mode(WindowProperties.M_relative)
         base.win.request_properties(props)
         #sky Color
-        base.set_background_color(0, 0, 255)
+        base.set_background_color(0.1, 0.1, 0.1)
         
         #set fov to 90 for normal gaming expirence
         self.camLens.set_fov(90)
@@ -167,7 +176,7 @@ class app(ShowBase):
         exponential_fog = Fog('world_fog')
         exponential_fog.set_color(0, 0, 0)
         # this is a very low fog value, set it higher for a greater effect
-        exponential_fog.set_exp_density(0)
+        exponential_fog.set_exp_density(0.03)
         self.render.set_fog(exponential_fog)
         
         self.game_start = 0
@@ -199,17 +208,11 @@ class app(ShowBase):
             geom_nodes = input_model.find_all_matches('**/+GeomNode')
             geom_nodes = geom_nodes.get_path(node_number).node()
             
-            print(geom_nodes)
-            
             geom_target = geom_nodes.get_geom(0)
-            
-            print(geom_target)
             
             output_bullet_mesh = BulletTriangleMesh()
             output_bullet_mesh.add_geom(geom_target)
             tri_shape = BulletTriangleMeshShape(output_bullet_mesh, dynamic=False)
-            
-            print(output_bullet_mesh)
 
             body = BulletRigidBodyNode('input_model_tri_mesh')
             np = self.render.attach_new_node(body)
@@ -476,6 +479,7 @@ class app(ShowBase):
                 if self.keyMap["left"]:
                     if self.static_pos_bool:
                         self.static_pos_bool = False
+                        walkSound.play()
                         
                     self.player.set_x(self.player, -self.striveSpeed * globalClock.get_dt())
                     
@@ -483,6 +487,7 @@ class app(ShowBase):
                     if not self.static_pos_bool:
                         self.static_pos_bool = True
                         self.static_pos = self.player.get_pos()
+                        
                         
                     self.player.set_x(self.static_pos[0])
                     self.player.set_y(self.static_pos[1])
@@ -515,6 +520,7 @@ class app(ShowBase):
                     animate_player()
                     
                 if self.keyMap["forward"] != 1:
+                    walkSound.play()
                     if not self.static_pos_bool:
                         self.static_pos_bool = True
                         self.static_pos = self.player.get_pos()
@@ -769,8 +775,6 @@ def main():
             screen.blit(check, (635,290))            
             
             f = open("info.txt", "r")
-            
-            print(f.read())
             
             #Back Box
             pygame.draw.rect(screen, boxColor2, (25,25,100,50))
