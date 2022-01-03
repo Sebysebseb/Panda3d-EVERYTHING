@@ -774,7 +774,7 @@ def main():
             check = font1.render("Check Console for Info",True,(255,255,255))
             screen.blit(check, (635,290))            
             
-            f = open("info.txt", "r")
+            f = open("Info.txt", "r")
             
             #Back Box
             pygame.draw.rect(screen, boxColor2, (25,25,100,50))
